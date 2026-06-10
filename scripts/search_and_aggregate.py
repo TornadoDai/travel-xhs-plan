@@ -242,6 +242,135 @@ def search_and_aggregate(destination: str, preferences: dict, max_notes: int = 1
     return aggregated
 
 
+def search_spot_image(spot_name: str, destination: str) -> str:
+    """
+    为景点搜索代表性图片
+
+    Args:
+        spot_name: 景点名称
+        destination: 目的地
+
+    Returns:
+        str: 图片URL或空字符串
+    """
+    import requests
+
+    # 使用百度图片搜索
+    search_url = "https://image.baidu.com/search/acjson"
+    params = {
+        "tn": "resultjson_com",
+        "logid": "1234567890",
+        "ipn": "rj",
+        "ct": "201326592",
+        "is": "",
+        "fp": "result",
+        "fr": "",
+        "word": spot_name,
+        "queryWord": spot_name,
+        "cl": "2",
+        "lm": "-1",
+        "ie": "utf-8",
+        "oe": "utf-8",
+        "adpicid": "",
+        "st": "-1",
+        "z": "",
+        "ic": "",
+        "hd": "",
+        "latest": "",
+        "copyright": "",
+        "s": "",
+        "se": "",
+        "tab": "",
+        "width": "",
+        "height": "",
+        "face": "0",
+        "istype": "2",
+        "qc": "",
+        "nc": "1",
+        "expermode": "",
+        "nojc": "",
+        "isAsync": "",
+        "pn": 0,
+        "rn": 5,
+        "gsm": "1e",
+    }
+
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': '*/*',
+        'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+        'Referer': 'https://image.baidu.com/',
+    }
+
+    try:
+        resp = requests.get(search_url, params=params, headers=headers, timeout=10)
+        if resp.status_code == 200:
+            data = resp.json()
+            for item in data.get("data", []):
+                thumb_url = item.get("thumbURL", "")
+                if thumb_url:
+                    return thumb_url
+    except Exception as e:
+        logger.warning(f"搜索图片失败 {spot_name}: {e}")
+
+    return ""
+
+
+def download_spot_images(spots: list, destination: str, save_dir: str) -> dict:
+    """
+    为景点下载代表性图片
+
+    Args:
+        spots: 景点列表
+        destination: 目的地
+        save_dir: 保存目录
+
+    Returns:
+        dict: {spot_name: image_path}
+    """
+    import hashlib
+
+    os.makedirs(save_dir, exist_ok=True)
+
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
+    }
+
+    spot_images = {}
+    for spot in spots[:15]:  # 最多15个景点
+        # 提取景点名称（取前10个字）
+        spot_name = spot[:10] if len(spot) > 10 else spot
+
+        # 搜索图片
+        image_url = search_spot_image(spot_name, destination)
+        if not image_url:
+            continue
+
+        # 生成文件名
+        url_hash = hashlib.sha256(image_url.encode()).hexdigest()[:16]
+        filename = f"spot_{url_hash}.jpg"
+        filepath = os.path.join(save_dir, filename)
+
+        # 检查是否已存在
+        if os.path.exists(filepath):
+            spot_images[spot] = filepath
+            continue
+
+        # 下载
+        try:
+            resp = requests.get(image_url, headers=headers, timeout=15)
+            if resp.status_code == 200:
+                with open(filepath, 'wb') as f:
+                    f.write(resp.content)
+                spot_images[spot] = filepath
+                logger.info(f"下载景点图片: {spot_name}")
+        except Exception as e:
+            logger.warning(f"下载景点图片失败 {spot_name}: {e}")
+
+    return spot_images
+
+
 def aggregate_notes(notes: list, destination: str) -> dict:
     """
     聚合笔记数据，删除重复内容，保留重点
@@ -299,13 +428,17 @@ def aggregate_notes(notes: list, destination: str) -> dict:
                 all_comments.append(comment)
 
     # 去重
-    unique_spots = list(set(all_spots))[:20]
-    unique_foods = list(set(all_foods))[:15]
-    unique_tips = list(set(all_tips))[:15]
+    unique_spots = list(set(all_spots))[:15]
+    unique_foods = list(set(all_foods))[:10]
+    unique_tips = list(set(all_tips))[:10]
 
     # 按点赞数排序评论
     all_comments.sort(key=lambda x: int(x.get("likes", "0") or "0"), reverse=True)
-    unique_comments = all_comments[:20]
+    unique_comments = all_comments[:15]
+
+    # 为景点下载代表性图片
+    images_dir = str(get_images_dir() / destination.replace(" ", "_") / "spots")
+    spot_images = download_spot_images(unique_spots, destination, images_dir)
 
     return {
         "destination": destination,
@@ -313,6 +446,7 @@ def aggregate_notes(notes: list, destination: str) -> dict:
         "notes": notes,
         "aggregated": {
             "spots": unique_spots,
+            "spot_images": spot_images,
             "foods": unique_foods,
             "tips": unique_tips,
             "top_comments": unique_comments
