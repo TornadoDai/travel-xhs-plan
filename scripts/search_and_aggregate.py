@@ -329,6 +329,7 @@ def download_spot_images(spots: list, destination: str, save_dir: str) -> dict:
         dict: {spot_name: image_path}
     """
     import hashlib
+    import requests
 
     os.makedirs(save_dir, exist_ok=True)
 
@@ -382,6 +383,20 @@ def aggregate_notes(notes: list, destination: str) -> dict:
     Returns:
         dict: 聚合后的数据
     """
+    # 常见景点名称（用于匹配）
+    spot_names = [
+        "莫日格勒河", "莫尔格勒河", "额尔古纳", "呼伦湖", "满洲里", "海拉尔",
+        "黑山头", "恩和", "室韦", "临江", "莫尔道嘎", "白桦林", "湿地",
+        "国门", "套娃", "广场", "博物馆", "草原", "森林", "驯鹿",
+        "边防线", "卡线", "太极图", "风车", "牧场", "部落"
+    ]
+
+    # 常见美食名称
+    food_names = [
+        "手把肉", "烤羊排", "火锅", "奶茶", "冰淇淋", "列巴", "酸奶",
+        "羊肉", "牛肉", "锅茶", "涮肉", "饺子", "西餐"
+    ]
+
     # 提取所有景点
     all_spots = []
     # 提取所有美食
@@ -394,42 +409,39 @@ def aggregate_notes(notes: list, destination: str) -> dict:
     for note in notes:
         content = note.get("content", "")
 
-        # 提取景点（简单关键词匹配）
-        spot_keywords = ["景区", "景点", "公园", "湿地", "河", "湖", "山", "草原", "广场", "博物馆"]
-        for keyword in spot_keywords:
-            if keyword in content:
-                # 提取包含关键词的句子
-                sentences = content.split("。")
-                for sentence in sentences:
-                    if keyword in sentence and len(sentence) < 50:
-                        all_spots.append(sentence.strip())
+        # 提取景点
+        for spot in spot_names:
+            if spot in content:
+                all_spots.append(spot)
 
         # 提取美食
-        food_keywords = ["美食", "餐厅", "火锅", "烤肉", "奶茶", "冰淇淋", "列巴", "手把肉", "羊排"]
-        for keyword in food_keywords:
-            if keyword in content:
-                sentences = content.split("。")
-                for sentence in sentences:
-                    if keyword in sentence and len(sentence) < 50:
-                        all_foods.append(sentence.strip())
+        for food in food_names:
+            if food in content:
+                all_foods.append(food)
 
-        # 提取贴士
-        tip_keywords = ["注意", "建议", "必备", "推荐", "记得", "提前"]
+        # 提取贴士（包含关键词的句子）
+        tip_keywords = ["注意", "建议", "必备", "推荐", "记得", "提前", "不要", "一定要"]
         for keyword in tip_keywords:
             if keyword in content:
-                sentences = content.split("。")
-                for sentence in sentences:
-                    if keyword in sentence and len(sentence) < 80:
-                        all_tips.append(sentence.strip())
+                # 提取包含关键词的句子
+                for line in content.split("\n"):
+                    if keyword in line and 10 < len(line) < 100:
+                        all_tips.append(line.strip())
+                        break
 
         # 收集评论
         for comment in note.get("comments", []):
             if int(comment.get("likes", "0") or "0") >= 2:  # 只保留高赞评论
                 all_comments.append(comment)
 
-    # 去重
-    unique_spots = list(set(all_spots))[:15]
-    unique_foods = list(set(all_foods))[:10]
+    # 去重并计数
+    from collections import Counter
+    spot_counts = Counter(all_spots)
+    food_counts = Counter(all_foods)
+
+    # 按出现次数排序
+    unique_spots = [spot for spot, count in spot_counts.most_common(15)]
+    unique_foods = [food for food, count in food_counts.most_common(10)]
     unique_tips = list(set(all_tips))[:10]
 
     # 按点赞数排序评论
