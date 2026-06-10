@@ -1,0 +1,16 @@
+{
+  "name": "solo_travel",
+  "travel_style": "adventurous",
+  "budget_level": "mid-range",
+  "accommodation_preference": ["boutique hotels", "Airbnb"],
+  "interests": ["food", "culture", "photography"],
+  "dietary_restrictions": ["none"],
+  "pace_preference": "moderate",
+  "travel_companions": "solo",
+  "language_skills": ["Chinese", "English"],
+  "previous_destinations": ["Tokyo", "Seoul"],
+  "bucket_list": [
+    {"destination": "Kyoto", "notes": "Cherry blossom season"},
+    {"destination": "Bangkok", "notes": "Street food"}
+  ]
+}

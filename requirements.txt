@@ -1,0 +1,20 @@
+# 小红书旅行攻略生成器 - Python 依赖
+
+# CLI
+click>=8.0.0
+
+# HTML 模板
+Jinja2>=3.1.0
+
+# HTTP 请求
+requests>=2.28.0
+
+# 数据处理
+dataclasses-json>=0.5.0
+
+# 日志
+loguru>=0.6.0
+
+# 测试
+pytest>=7.0.0
+pytest-cov>=4.0.0

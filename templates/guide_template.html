@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ destination }}旅行攻略</title>
+    <style>
+        :root {
+            --primary-color: #FF6B6B;
+            --secondary-color: #4ECDC4;
+            --accent-color: #FFE66D;
+            --text-color: #2C3E50;
+            --text-light: #7F8C8D;
+            --background: #F8F9FA;
+            --card-bg: #FFFFFF;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.1);
+            --radius: 16px;
+            --radius-sm: 10px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background: var(--background);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* ====== 封面区 ====== */
+        header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #ee5a6f 50%, var(--secondary-color) 100%);
+            color: white;
+            padding: 60px 30px;
+            text-align: center;
+            border-radius: var(--radius);
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            animation: shimmer 8s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(10%, 10%); }
+        }
+
+        header h1 {
+            font-size: 2.8em;
+            margin-bottom: 15px;
+            font-weight: 800;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        header p {
+            font-size: 1.15em;
+            opacity: 0.95;
+            position: relative;
+        }
+
+        .header-meta {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            position: relative;
+        }
+
+        .header-meta span {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 0.95em;
+            backdrop-filter: blur(10px);
+        }
+
+        /* ====== 目录导航 ====== */
+        nav {
+            background: var(--card-bg);
+            padding: 20px 25px;
+            border-radius: var(--radius);
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        nav h3 {
+            color: var(--primary-color);
+            margin-bottom: 12px;
+            font-size: 1em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 8px 18px;
+            border-radius: 25px;
+            background: var(--background);
+            transition: all 0.3s ease;
+            font-size: 0.95em;
+        }
+
+        nav a:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* ====== 通用卡片 ====== */
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 28px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-hover);
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            font-size: 1.6em;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 3px solid var(--accent-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title .icon {
+            font-size: 1.2em;
+        }
+
+        /* ====== 概览区 ====== */
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+            margin-top: 18px;
+        }
+
+        .overview-item {
+            background: linear-gradient(135deg, var(--background), #fff);
+            padding: 22px;
+            border-radius: var(--radius-sm);
+            text-align: center;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .overview-item .label {
+            color: var(--text-light);
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+
+        .overview-item .value {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .highlights {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .highlight-tag {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 8px 18px;
+            border-radius: 25px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        /* ====== 行程区 ====== */
+        .day-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .day-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 18px;
+        }
+
+        .day-number {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.3em;
+            flex-shrink: 0;
+        }
+
+        .day-theme {
+            font-size: 1.25em;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .activity {
+            padding: 18px 0;
+            border-bottom: 1px dashed #eee;
+        }
+
+        .activity:last-child {
+            border-bottom: none;
+        }
+
+        .activity-time {
+            display: inline-block;
+            background: var(--accent-color);
+            color: var(--text-color);
+            padding: 4px 14px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .activity-spot {
+            font-weight: 700;
+            font-size: 1.1em;
+            margin-bottom: 6px;
+            color: var(--text-color);
+        }
+
+        .activity-desc {
+            color: var(--text-light);
+            font-size: 0.95em;
+            margin-bottom: 8px;
+        }
+
+        .activity-meta {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            font-size: 0.88em;
+            color: var(--text-light);
+        }
+
+        .activity-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .activity-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: var(--radius-sm);
+            margin-top: 12px;
+        }
+
+        /* ====== 美食/景点网格 ====== */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .food-card,
+        .spot-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .food-card:hover,
+        .spot-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .card-body {
+            padding: 18px;
+        }
+
+        .card-name {
+            font-size: 1.15em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-color);
+        }
+
+        .card-info {
+            font-size: 0.9em;
+            color: var(--text-light);
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .card-source {
+            color: #bbb;
+            font-size: 0.8em;
+            font-style: italic;
+            margin-top: 10px;
+        }
+
+        .card-tag {
+            display: inline-block;
+            background: var(--background);
+            color: var(--text-light);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.82em;
+            margin-top: 8px;
+        }
+
+        /* ====== 交通区 ====== */
+        .transport-item {
+            padding: 15px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .transport-item:last-child {
+            border-bottom: none;
+        }
+
+        .transport-label {
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 6px;
+        }
+
+        /* ====== 贴士区 ====== */
+        .tips-list {
+            list-style: none;
+        }
+
+        .tips-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #f5f5f5;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .tips-list li:last-child {
+            border-bottom: none;
+        }
+
+        .tip-icon {
+            background: var(--accent-color);
+            color: var(--text-color);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85em;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* ====== 来源区 ====== */
+        .source-list {
+            list-style: none;
+        }
+
+        .source-item {
+            padding: 12px 0;
+            border-bottom: 1px solid #f5f5f5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .source-item:last-child {
+            border-bottom: none;
+        }
+
+        .source-title {
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .source-meta {
+            font-size: 0.85em;
+            color: var(--text-light);
+        }
+
+        .source-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 0.9em;
+        }
+
+        .source-link:hover {
+            text-decoration: underline;
+        }
+
+        /* ====== 页脚 ====== */
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-light);
+            font-size: 0.9em;
+        }
+
+        footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        /* ====== 响应式 ====== */
+        @media (max-width: 768px) {
+            .container {
+                padding: 12px;
+            }
+
+            header {
+                padding: 40px 20px;
+            }
+
+            header h1 {
+                font-size: 2em;
+            }
+
+            .header-meta {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            nav ul {
+                flex-direction: column;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .day-number {
+                width: 45px;
+                height: 45px;
+                font-size: 1.1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 封面区 -->
+        <header>
+            <h1>✈️ {{ destination }}旅行攻略</h1>
+            <p>基于小红书 {{ feed_count }} 篇热门攻略，为你量身定制</p>
+            <div class="header-meta">
+                <span>📅 {{ days }}天行程</span>
+                <span>💰 {{ budget_estimate }}</span>
+                <span>🗓️ {{ generate_date }}</span>
+            </div>
+        </header>
+
+        <!-- 目录导航 -->
+        <nav>
+            <h3>📑 目录导航</h3>
+            <ul>
+                <li><a href="#overview">行程概览</a></li>
+                <li><a href="#itinerary">每日行程</a></li>
+                <li><a href="#food">美食推荐</a></li>
+                <li><a href="#spots">景点打卡</a></li>
+                <li><a href="#transport">交通指南</a></li>
+                <li><a href="#tips">实用贴士</a></li>
+                <li><a href="#sources">数据来源</a></li>
+            </ul>
+        </nav>
+
+        <!-- 行程概览 -->
+        <section id="overview" class="card">
+            <h2 class="section-title"><span class="icon">📋</span> 行程概览</h2>
+            <div class="overview-grid">
+                <div class="overview-item">
+                    <div class="label">最佳季节</div>
+                    <div class="value">{{ overview.best_season }}</div>
+                </div>
+                <div class="overview-item">
+                    <div class="label">推荐天数</div>
+                    <div class="value">{{ overview.recommended_days }}天</div>
+                </div>
+                <div class="overview-item">
+                    <div class="label">预算估计</div>
+                    <div class="value">{{ overview.budget_estimate }}</div>
+                </div>
+            </div>
+            <div class="highlights">
+                {% for highlight in overview.highlights %}
+                <span class="highlight-tag">{{ highlight }}</span>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- 每日行程 -->
+        <section id="itinerary">
+            <h2 class="section-title"><span class="icon">🗓️</span> 每日行程</h2>
+            {% for day in itinerary %}
+            <div class="day-card">
+                <div class="day-header">
+                    <div class="day-number">D{{ day.day }}</div>
+                    <div class="day-theme">{{ day.theme }}</div>
+                </div>
+                {% for activity in day.activities %}
+                <div class="activity">
+                    <span class="activity-time">{{ activity.time }}</span>
+                    <div class="activity-spot">{{ activity.spot }}</div>
+                    <div class="activity-desc">{{ activity.description }}</div>
+                    <div class="activity-meta">
+                        {% if activity.duration %}<span>⏱️ {{ activity.duration }}</span>{% endif %}
+                        {% if activity.tips %}<span>💡 {{ activity.tips }}</span>{% endif %}
+                    </div>
+                    {% if activity.image %}
+                    <img src="{{ activity.image }}" alt="{{ activity.spot }}" class="activity-image" loading="lazy">
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </section>
+
+        <!-- 美食推荐 -->
+        <section id="food">
+            <h2 class="section-title"><span class="icon">🍜</span> 美食推荐</h2>
+            <div class="grid">
+                {% for food in food_recommendations %}
+                <div class="food-card">
+                    {% if food.image %}
+                    <img src="{{ food.image }}" alt="{{ food.name }}" class="card-image" loading="lazy">
+                    {% endif %}
+                    <div class="card-body">
+                        <div class="card-name">{{ food.name }}</div>
+                        <div class="card-info">🍽️ {{ food.type }}</div>
+                        <div class="card-info">📍 {{ food.location }}</div>
+                        <div class="card-info">💰 {{ food.price_range }}</div>
+                        <div class="card-info">⭐ 必点：{{ food.must_try }}</div>
+                        {% if food.source %}<div class="card-source">来源：{{ food.source }}</div>{% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- 景点打卡 -->
+        <section id="spots">
+            <h2 class="section-title"><span class="icon">📸</span> 景点打卡</h2>
+            <div class="grid">
+                {% for spot in spots %}
+                <div class="spot-card">
+                    {% if spot.image %}
+                    <img src="{{ spot.image }}" alt="{{ spot.name }}" class="card-image" loading="lazy">
+                    {% endif %}
+                    <div class="card-body">
+                        <div class="card-name">{{ spot.name }}</div>
+                        <span class="card-tag">{{ spot.category }}</span>
+                        <div class="card-info" style="margin-top: 10px;">{{ spot.description }}</div>
+                        <div class="card-info">⏱️ 建议游玩：{{ spot.duration }}</div>
+                        {% if spot.tips %}<div class="card-info">💡 {{ spot.tips }}</div>{% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- 交通指南 -->
+        <section id="transport" class="card">
+            <h2 class="section-title"><span class="icon">🚇</span> 交通指南</h2>
+            <div class="transport-item">
+                <div class="transport-label">✈️ 机场到市区</div>
+                <div>{{ transportation.from_airport }}</div>
+            </div>
+            <div class="transport-item">
+                <div class="transport-label">🚌 市内交通</div>
+                <div>{{ transportation.local | join('、') }}</div>
+            </div>
+            {% if transportation.tips %}
+            <div class="transport-item">
+                <div class="transport-label">💡 交通小贴士</div>
+                <div>{{ transportation.tips }}</div>
+            </div>
+            {% endif %}
+        </section>
+
+        <!-- 实用贴士 -->
+        <section id="tips" class="card">
+            <h2 class="section-title"><span class="icon">💡</span> 实用贴士</h2>
+            <ul class="tips-list">
+                {% for tip in tips %}
+                <li>
+                    <span class="tip-icon">{{ loop.index }}</span>
+                    <span>{{ tip }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <!-- 数据来源 -->
+        <section id="sources" class="card">
+            <h2 class="section-title"><span class="icon">📚</span> 数据来源</h2>
+            <p style="color: var(--text-light); margin-bottom: 15px;">本攻略基于以下小红书笔记生成</p>
+            <ul class="source-list">
+                {% for source in sources %}
+                <li class="source-item">
+                    <div>
+                        <div class="source-title">{{ source.title }}</div>
+                        <div class="source-meta">作者：{{ source.author }} | 👍 {{ source.likes }}</div>
+                    </div>
+                    {% if source.url %}
+                    <a href="{{ source.url }}" target="_blank" class="source-link">查看原文 →</a>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <!-- 页脚 -->
+        <footer>
+            <p>本攻略由 <strong>小红书旅行攻略生成器</strong> 自动生成</p>
+            <p>数据来源：小红书 | 生成时间：{{ generate_date }}</p>
+        </footer>
+    </div>
+</body>
+</html>

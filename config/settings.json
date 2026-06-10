@@ -1,0 +1,10 @@
+{
+  "xhs_skills_path": "E:\\Projects\\xiaohongshu-skills",
+  "github_repo": "",
+  "github_branch": "gh-pages",
+  "output_dir": "output",
+  "max_feeds_per_keyword": 10,
+  "max_images_per_feed": 5,
+  "preferences_dir": "~/.claude/travel_xhs/preferences",
+  "active_preference_file": "~/.claude/travel_xhs/active_preference"
+}
