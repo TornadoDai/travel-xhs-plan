@@ -37,6 +37,18 @@ def format_scraped_data_for_analysis(scraped_data: dict, preferences: dict, days
         "food": "美食", "photography": "摄影", "culture": "文化",
         "shopping": "购物", "nature": "自然", "nightlife": "夜生活"
     }
+    gender_map = {"male": "男", "female": "女", "other": "其他"}
+    occupation_map = {
+        "student": "学生", "engineer": "工程师", "teacher": "教师",
+        "doctor": "医生", "business": "商务人士", "freelance": "自由职业", "other": "其他"
+    }
+
+    # 提取出发地和个人信息
+    departure = preferences.get("departure", "")
+    personal = preferences.get("personal_info", {})
+    age = personal.get("age", "")
+    gender = gender_map.get(personal.get("gender", ""), "")
+    occupation = occupation_map.get(personal.get("occupation", ""), "")
 
     # 构建提示词
     prompt = f"""请分析以下小红书旅行内容，为用户生成一份个性化的旅行攻略。
@@ -44,9 +56,23 @@ def format_scraped_data_for_analysis(scraped_data: dict, preferences: dict, days
 ## 目的地
 {destination}
 
+## 出发地
+{departure if departure else '未指定'}
+
 ## 旅行天数
 {days} 天
 
+## 用户信息
+"""
+    if age or gender or occupation:
+        if age:
+            prompt += f"- 年龄段：{age}\n"
+        if gender:
+            prompt += f"- 性别：{gender}\n"
+        if occupation:
+            prompt += f"- 职业：{occupation}\n"
+
+    prompt += f"""
 ## 用户偏好
 - 旅行风格：{style_map.get(preferences.get('travel_style', ''), '休闲')}
 - 预算档次：{budget_map.get(preferences.get('budget_level', ''), '中档')}

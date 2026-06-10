@@ -18,6 +18,31 @@ class PreferenceManager:
 
     # 偏好字段定义
     PREFERENCE_FIELDS = {
+        "departure": {
+            "label": "出发城市",
+            "type": "text",
+            "placeholder": "例如：北京、上海、广州"
+        },
+        "personal_info": {
+            "label": "个人信息",
+            "fields": {
+                "age": {
+                    "label": "年龄段",
+                    "options": ["18-25", "26-35", "36-45", "46-55", "55+"],
+                    "option_labels": ["18-25岁", "26-35岁", "36-45岁", "46-55岁", "55岁以上"]
+                },
+                "gender": {
+                    "label": "性别",
+                    "options": ["male", "female", "other"],
+                    "option_labels": ["男", "女", "其他"]
+                },
+                "occupation": {
+                    "label": "职业",
+                    "options": ["student", "engineer", "teacher", "doctor", "business", "freelance", "other"],
+                    "option_labels": ["学生", "工程师", "教师", "医生", "商务人士", "自由职业", "其他"]
+                }
+            }
+        },
         "travel_style": {
             "label": "旅行风格",
             "options": ["adventurous", "relaxed", "cultural", "shopping"],
@@ -157,6 +182,12 @@ class PreferenceManager:
         """获取默认偏好配置"""
         return {
             "name": name,
+            "departure": "",
+            "personal_info": {
+                "age": "",
+                "gender": "",
+                "occupation": ""
+            },
             "travel_style": "relaxed",
             "budget_level": "mid-range",
             "interests": ["food", "culture"],
@@ -172,6 +203,33 @@ class PreferenceManager:
         """格式化偏好配置为显示文本"""
         lines = []
         lines.append(f"偏好名称: {data.get('name', '未命名')}")
+
+        # 出发地
+        departure = data.get('departure', '')
+        if departure:
+            lines.append(f"出发城市: {departure}")
+
+        # 个人信息
+        personal = data.get('personal_info', {})
+        if personal:
+            age = personal.get('age', '')
+            gender = personal.get('gender', '')
+            occupation = personal.get('occupation', '')
+            if age or gender or occupation:
+                info_parts = []
+                if age:
+                    info_parts.append(age)
+                if gender:
+                    gender_map = {"male": "男", "female": "女", "other": "其他"}
+                    info_parts.append(gender_map.get(gender, gender))
+                if occupation:
+                    occ_map = {
+                        "student": "学生", "engineer": "工程师", "teacher": "教师",
+                        "doctor": "医生", "business": "商务人士", "freelance": "自由职业", "other": "其他"
+                    }
+                    info_parts.append(occ_map.get(occupation, occupation))
+                lines.append(f"个人信息: {' / '.join(info_parts)}")
+
         lines.append(f"旅行风格: {self._get_label('travel_style', data.get('travel_style', ''))}")
         lines.append(f"预算档次: {self._get_label('budget_level', data.get('budget_level', ''))}")
 
@@ -209,7 +267,54 @@ class PreferenceManager:
 
         data = {"name": name}
 
+        # 出发地
+        departure = input("\n出发城市（如：北京）: ").strip()
+        data["departure"] = departure
+
+        # 个人信息
+        print("\n--- 个人信息 ---")
+        personal_info = {}
+
+        # 年龄
+        age_info = self.PREFERENCE_FIELDS["personal_info"]["fields"]["age"]
+        print(f"\n{age_info['label']}:")
+        for i, label in enumerate(age_info["option_labels"], 1):
+            print(f"  {i}. {label}")
+        age_choice = input("请选择: ").strip()
+        try:
+            personal_info["age"] = age_info["options"][int(age_choice) - 1]
+        except (ValueError, IndexError):
+            personal_info["age"] = ""
+
+        # 性别
+        gender_info = self.PREFERENCE_FIELDS["personal_info"]["fields"]["gender"]
+        print(f"\n{gender_info['label']}:")
+        for i, label in enumerate(gender_info["option_labels"], 1):
+            print(f"  {i}. {label}")
+        gender_choice = input("请选择: ").strip()
+        try:
+            personal_info["gender"] = gender_info["options"][int(gender_choice) - 1]
+        except (ValueError, IndexError):
+            personal_info["gender"] = ""
+
+        # 职业
+        occ_info = self.PREFERENCE_FIELDS["personal_info"]["fields"]["occupation"]
+        print(f"\n{occ_info['label']}:")
+        for i, label in enumerate(occ_info["option_labels"], 1):
+            print(f"  {i}. {label}")
+        occ_choice = input("请选择: ").strip()
+        try:
+            personal_info["occupation"] = occ_info["options"][int(occ_choice) - 1]
+        except (ValueError, IndexError):
+            personal_info["occupation"] = ""
+
+        data["personal_info"] = personal_info
+
+        # 其他偏好字段
         for field, info in self.PREFERENCE_FIELDS.items():
+            if field in ("departure", "personal_info"):
+                continue
+
             label = info["label"]
             options = info["options"]
             option_labels = info["option_labels"]

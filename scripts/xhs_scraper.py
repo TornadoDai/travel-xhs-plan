@@ -54,6 +54,12 @@ def generate_search_keywords(destination: str, preferences: dict) -> list[str]:
     """
     keywords = [f"{destination}旅行攻略"]
 
+    # 基于出发地
+    departure = preferences.get("departure", "")
+    if departure:
+        keywords.append(f"{departure}到{destination}攻略")
+        keywords.append(f"{departure}出发{destination}")
+
     # 基于兴趣
     interests = preferences.get("interests", [])
     for interest in interests:
