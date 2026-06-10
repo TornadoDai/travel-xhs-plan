@@ -5,1136 +5,330 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>呼伦贝尔 · 旅行攻略</title>
 <style>
-/* ── design tokens ── */
 :root {
   --ink: #1a1a2e;
   --paper: #fafaf9;
   --accent: #e63946;
-  --accent-light: #ff6b6b;
   --secondary: #457b9d;
-  --secondary-light: #a8dadc;
   --sand: #f1faee;
   --stone: #6b7280;
-  --stone-light: #9ca3af;
-  --radius: 16px;
-  --radius-sm: 10px;
-  --radius-lg: 24px;
+  --radius: 12px;
   --space: clamp(16px, 3vw, 32px);
-  --max-w: 1000px;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
-  --shadow-lg: 0 12px 40px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06);
-  --shadow-xl: 0 20px 60px rgba(0,0,0,0.15), 0 8px 20px rgba(0,0,0,0.08);
-  --font-display: 'Noto Serif SC', 'Source Han Serif SC', 'PingFang SC', 'Songti SC', Georgia, serif;
-  --font-body: 'Noto Sans SC', 'Source Han Sans SC', 'PingFang SC', 'Microsoft YaHei', -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
-  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --max-w: 960px;
 }
-
-/* ── reset ── */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-html {
-  scroll-behavior: smooth;
-  -webkit-text-size-adjust: 100%;
-}
-
-body {
-  font-family: var(--font-body);
-  color: var(--ink);
-  background: var(--paper);
-  line-height: 1.8;
-  font-size: 15px;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-a {
-  color: var(--accent);
-  text-decoration: none;
-  transition: color var(--transition);
-}
-
-a:hover {
-  color: var(--accent-light);
-}
-
-/* ── layout ── */
-.wrap {
-  max-width: var(--max-w);
-  margin: 0 auto;
-  padding: 0 var(--space);
-}
-
-/* ── hero ── */
-.hero {
-  position: relative;
-  min-height: 60vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: clamp(80px, 15vh, 160px) var(--space);
-  overflow: hidden;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-  color: white;
-}
-
-.hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='800' viewBox='0 0 800 800'%3E%3Cpath d='M400 100 Q500 200 400 300 Q300 400 400 500 Q500 600 400 700' fill='none' stroke='%23ffffff' stroke-width='0.8' opacity='0.06'/%3E%3Cpath d='M350 50 Q450 150 350 250 Q250 350 350 450 Q450 550 350 650' fill='none' stroke='%23ffffff' stroke-width='0.6' opacity='0.05'/%3E%3Cpath d='M450 50 Q550 150 450 250 Q350 350 450 450 Q550 550 450 650' fill='none' stroke='%23ffffff' stroke-width='0.6' opacity='0.05'/%3E%3Cpath d='M300 0 Q400 100 300 200 Q200 300 300 400 Q400 500 300 600 Q200 700 300 800' fill='none' stroke='%23ffffff' stroke-width='0.4' opacity='0.04'/%3E%3Cpath d='M500 0 Q600 100 500 200 Q400 300 500 400 Q600 500 500 600 Q400 700 500 800' fill='none' stroke='%23ffffff' stroke-width='0.4' opacity='0.04'/%3E%3Ccircle cx='400' cy='400' r='200' fill='none' stroke='%23ffffff' stroke-width='0.3' opacity='0.03'/%3E%3Ccircle cx='400' cy='400' r='300' fill='none' stroke='%23ffffff' stroke-width='0.2' opacity='0.02'/%3E%3C/svg%3E")
-    center / cover no-repeat;
-  pointer-events: none;
-  animation: float 20s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(-10px, -10px) scale(1.02); }
-}
-
-.hero-content {
-  text-align: center;
-  position: relative;
-  z-index: 1;
-}
-
-.hero h1 {
-  font-family: var(--font-display);
-  font-size: clamp(2.5rem, 8vw, 4.5rem);
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  margin-bottom: 16px;
-  text-shadow: 0 4px 20px rgba(0,0,0,0.3);
-  line-height: 1.2;
-}
-
-.hero .subtitle {
-  font-size: clamp(1rem, 2.5vw, 1.25rem);
-  opacity: 0.85;
-  margin-bottom: 32px;
-  font-weight: 300;
-  letter-spacing: 0.05em;
-}
-
-.hero .meta {
-  display: flex;
-  justify-content: center;
-  gap: 32px;
-  flex-wrap: wrap;
-}
-
-.hero .meta-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-
-.hero .meta-value {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 700;
-}
-
-.hero .meta-label {
-  font-size: 0.75rem;
-  opacity: 0.6;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-/* ── nav ── */
-.toc {
-  background: white;
-  border-radius: var(--radius);
-  padding: 24px 28px;
-  margin: -32px auto 48px;
-  max-width: var(--max-w);
-  position: relative;
-  z-index: 2;
-  box-shadow: var(--shadow-lg);
-}
-
-.toc-title {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--stone);
-  margin-bottom: 12px;
-  font-weight: 600;
-}
-
-.toc ul {
-  list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.toc a {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 18px;
-  border-radius: 24px;
-  font-size: 0.88rem;
-  color: var(--ink);
-  background: var(--sand);
-  border: 1px solid transparent;
-  transition: all var(--transition);
-  font-weight: 500;
-}
-
-.toc a:hover {
-  background: var(--accent);
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
-}
-
-/* ── sections ── */
-section {
-  margin-bottom: 72px;
-}
-
-.section-head {
-  font-family: var(--font-display);
-  font-size: 1.6rem;
-  font-weight: 700;
-  margin-bottom: 32px;
-  padding-bottom: 16px;
-  border-bottom: 3px solid var(--ink);
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  letter-spacing: 0.02em;
-}
-
-.section-head .icon {
-  font-size: 0.9em;
-  opacity: 0.7;
-}
-
-.section-head .count {
-  font-size: 0.75rem;
-  color: var(--stone);
-  font-weight: 400;
-  margin-left: auto;
-  font-family: var(--font-mono);
-}
-
-/* ── overview grid ── */
-.overview-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: 28px;
-}
-
-.stat {
-  background: white;
-  border-radius: var(--radius);
-  padding: 28px 24px;
-  text-align: center;
-  border: 1px solid rgba(0,0,0,0.06);
-  transition: all var(--transition);
-}
-
-.stat:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
-}
-
-.stat .label {
-  font-size: 0.72rem;
-  color: var(--stone);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  margin-bottom: 8px;
-  font-weight: 600;
-}
-
-.stat .value {
-  font-family: var(--font-display);
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--accent);
-}
-
-.tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 18px;
-  border-radius: 24px;
-  font-size: 0.85rem;
-  background: var(--ink);
-  color: var(--paper);
-  font-weight: 500;
-  transition: all var(--transition);
-}
-
-.tag:hover {
-  background: var(--accent);
-  transform: translateY(-2px);
-}
-
-/* ── day card ── */
-.day {
-  background: white;
-  border-radius: var(--radius-lg);
-  padding: 32px;
-  margin-bottom: 24px;
-  border: 1px solid rgba(0,0,0,0.06);
-  box-shadow: var(--shadow-sm);
-  transition: all var(--transition);
-  position: relative;
-  overflow: hidden;
-}
-
-.day::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 6px;
-  background: linear-gradient(180deg, var(--accent), var(--accent-light));
-  border-radius: 6px 0 0 6px;
-}
-
-.day:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
-}
-
-.day-head {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 28px;
-}
-
-.day-num {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), var(--accent-light));
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-mono);
-  font-weight: 800;
-  font-size: 1.1rem;
-  flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
-}
-
-.day-title {
-  font-family: var(--font-display);
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: var(--ink);
-  line-height: 1.4;
-}
-
-.activity {
-  padding: 20px 0;
-  border-top: 1px solid rgba(0,0,0,0.06);
-}
-
-.activity:first-of-type {
-  border-top: none;
-  padding-top: 0;
-}
-
-.time-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 16px;
-  border-radius: 20px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  background: var(--sand);
-  color: var(--secondary);
-  margin-bottom: 12px;
-  letter-spacing: 0.04em;
-}
-
-.activity h4 {
-  font-size: 1.05rem;
-  font-weight: 700;
-  margin-bottom: 8px;
-  color: var(--ink);
-}
-
-.activity p {
-  color: var(--stone);
-  font-size: 0.92rem;
-  margin-bottom: 12px;
-  line-height: 1.7;
-}
-
-.activity .meta-row {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-  font-size: 0.82rem;
-  color: var(--stone);
-}
-
-.activity .meta-row span {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.activity-image {
-  width: 100%;
-  max-height: 320px;
-  object-fit: cover;
-  border-radius: var(--radius);
-  margin-top: 16px;
-  box-shadow: var(--shadow-sm);
-  transition: all var(--transition);
-}
-
-.activity-image:hover {
-  box-shadow: var(--shadow-md);
-  transform: scale(1.02);
-}
-
-/* ── grid cards (food / spots) ── */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
-}
-
-.grid-card {
-  background: white;
-  border-radius: var(--radius);
-  overflow: hidden;
-  border: 1px solid rgba(0,0,0,0.06);
-  box-shadow: var(--shadow-sm);
-  transition: all var(--transition);
-}
-
-.grid-card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-4px);
-}
-
-.grid-card-image {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  transition: transform 0.5s ease;
-}
-
-.grid-card:hover .grid-card-image {
-  transform: scale(1.05);
-}
-
-.grid-card-image-wrapper {
-  overflow: hidden;
-  position: relative;
-}
-
-.grid-card-image-wrapper::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 60px;
-  background: linear-gradient(transparent, rgba(0,0,0,0.1));
-  pointer-events: none;
-}
-
-.grid-card .body {
-  padding: 20px 22px;
-}
-
-.grid-card h4 {
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin-bottom: 12px;
-  color: var(--ink);
-  line-height: 1.4;
-}
-
-.grid-card .info {
-  font-size: 0.88rem;
-  color: var(--stone);
-  margin: 6px 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  line-height: 1.5;
-}
-
-.grid-card .badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 5px 14px;
-  border-radius: 16px;
-  font-size: 0.78rem;
-  background: var(--sand);
-  color: var(--secondary);
-  margin-top: 10px;
-  font-weight: 600;
-}
-
-.grid-card .source {
-  font-size: 0.78rem;
-  color: var(--stone-light);
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(0,0,0,0.06);
-  font-style: italic;
-}
-
-/* ── transport ── */
-.transport-card {
-  background: white;
-  border-radius: var(--radius-lg);
-  padding: 32px;
-  box-shadow: var(--shadow-sm);
-  border: 1px solid rgba(0,0,0,0.06);
-}
-
-.transport-item {
-  padding: 20px 0;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
-}
-
-.transport-item:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-.transport-item:first-child {
-  padding-top: 0;
-}
-
-.transport-label {
-  font-weight: 700;
-  color: var(--accent);
-  font-size: 0.95rem;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.transport-item div:not(.transport-label) {
-  color: var(--stone);
-  font-size: 0.92rem;
-  line-height: 1.7;
-}
-
-/* ── tips ── */
-.tips-card {
-  background: white;
-  border-radius: var(--radius-lg);
-  padding: 32px;
-  box-shadow: var(--shadow-sm);
-  border: 1px solid rgba(0,0,0,0.06);
-}
-
-.tips-list {
-  list-style: none;
-  counter-reset: tip;
-}
-
-.tips-list li {
-  counter-increment: tip;
-  padding: 16px 0;
-  border-bottom: 1px solid rgba(0,0,0,0.04);
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  font-size: 0.95rem;
-  line-height: 1.7;
-  color: var(--ink);
-}
-
-.tips-list li:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-.tips-list li::before {
-  content: counter(tip);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), var(--accent-light));
-  color: white;
-  font-size: 0.82rem;
-  font-weight: 700;
-  flex-shrink: 0;
-  margin-top: 2px;
-  box-shadow: 0 2px 8px rgba(230, 57, 70, 0.3);
-}
-
-/* ── sources ── */
-.source-list {
-  list-style: none;
-}
-
-.source-item {
-  padding: 16px 0;
-  border-bottom: 1px solid rgba(0,0,0,0.06);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 20px;
-  transition: all var(--transition);
-}
-
-.source-item:hover {
-  background: var(--sand);
-  margin: 0 -16px;
-  padding: 16px;
-  border-radius: var(--radius-sm);
-}
-
-.source-item:last-child {
-  border-bottom: none;
-}
-
-.source-info {
-  flex: 1;
-}
-
-.source-title {
-  font-weight: 600;
-  font-size: 0.95rem;
-  color: var(--ink);
-  margin-bottom: 4px;
-  line-height: 1.5;
-}
-
-.source-meta {
-  font-size: 0.82rem;
-  color: var(--stone);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.source-link {
-  color: var(--accent);
-  text-decoration: none;
-  font-size: 0.88rem;
-  font-weight: 500;
-  white-space: nowrap;
-  padding: 6px 14px;
-  border-radius: 16px;
-  border: 1px solid var(--accent);
-  transition: all var(--transition);
-}
-
-.source-link:hover {
-  background: var(--accent);
-  color: white;
-}
-
-/* ── footer ── */
-footer {
-  text-align: center;
-  padding: 48px var(--space);
-  color: var(--stone);
-  font-size: 0.85rem;
-  border-top: 1px solid rgba(0,0,0,0.08);
-  margin-top: 40px;
-  background: white;
-}
-
-footer strong {
-  color: var(--ink);
-  font-weight: 600;
-}
-
-footer .footer-meta {
-  margin-top: 12px;
-  display: flex;
-  justify-content: center;
-  gap: 24px;
-  flex-wrap: wrap;
-  font-size: 0.78rem;
-  color: var(--stone-light);
-}
-
-/* ── reveal animation ── */
-.reveal {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-
-.reveal.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.reveal-delay-1 { transition-delay: 0.1s; }
-.reveal-delay-2 { transition-delay: 0.2s; }
-.reveal-delay-3 { transition-delay: 0.3s; }
-
-/* ── responsive ── */
-@media (max-width: 768px) {
-  .hero {
-    min-height: 50vh;
-    padding: 60px 16px;
-  }
-
-  .hero h1 {
-    font-size: 2rem;
-  }
-
-  .hero .meta {
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .toc {
-    margin: -24px 16px 32px;
-    padding: 20px;
-  }
-
-  .toc ul {
-    flex-direction: column;
-  }
-
-  .toc a {
-    justify-content: center;
-  }
-
-  .overview-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .grid {
-    grid-template-columns: 1fr;
-  }
-
-  .day {
-    padding: 24px 20px;
-  }
-
-  .day-head {
-    gap: 14px;
-  }
-
-  .day-num {
-    width: 48px;
-    height: 48px;
-    font-size: 1rem;
-  }
-
-  .day-title {
-    font-size: 1.15rem;
-  }
-
-  .source-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .source-link {
-    width: 100%;
-    text-align: center;
-  }
-
-  .source-item:hover {
-    margin: 0;
-    padding: 16px 0;
-  }
-
-  .section-head {
-    font-size: 1.3rem;
-  }
-
-  .transport-card,
-  .tips-card {
-    padding: 24px 20px;
-  }
-}
-
-/* ── reduced motion ── */
-@media (prefers-reduced-motion: reduce) {
-  .reveal {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-
-  .grid-card,
-  .stat,
-  .day,
-  .toc a,
-  .tag {
-    transition: none;
-  }
-
-  .hero::before {
-    animation: none;
-  }
-
-  .grid-card:hover,
-  .stat:hover,
-  .day:hover,
-  .toc a:hover,
-  .tag:hover {
-    transform: none;
-  }
-}
-
-/* ── print styles ── */
-@media print {
-  .hero {
-    min-height: auto;
-    padding: 40px;
-    background: white;
-    color: black;
-  }
-
-  .hero::before {
-    display: none;
-  }
-
-  .toc {
-    display: none;
-  }
-
-  .reveal {
-    opacity: 1;
-    transform: none;
-  }
-
-  .day,
-  .grid-card,
-  .stat,
-  .transport-card,
-  .tips-card {
-    box-shadow: none;
-    border: 1px solid #ddd;
-  }
+body { font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; color: var(--ink); background: var(--paper); line-height: 1.75; font-size: 15px; }
+.wrap { max-width: var(--max-w); margin: 0 auto; padding: 0 var(--space); }
+.hero { padding: clamp(60px, 12vh, 120px) var(--space); text-align: center; background: var(--ink); color: var(--paper); }
+.hero h1 { font-size: clamp(2rem, 6vw, 3.5rem); font-weight: 700; margin-bottom: 12px; }
+.hero .subtitle { font-size: 1.1rem; opacity: 0.75; }
+.hero .meta { display: flex; justify-content: center; gap: 24px; margin-top: 28px; flex-wrap: wrap; }
+.hero .meta span { font-size: 0.85rem; opacity: 0.65; }
+.toc { background: white; border-radius: var(--radius); padding: 20px 24px; margin: -24px auto 40px; max-width: var(--max-w); position: relative; z-index: 1; box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
+.toc ul { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.toc a { display: inline-block; padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; color: var(--ink); text-decoration: none; border: 1px solid rgba(0,0,0,0.08); }
+.toc a:hover { background: var(--accent); color: white; }
+section { margin-bottom: 56px; }
+.section-head { font-size: 1.35rem; font-weight: 700; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid var(--ink); }
+.overview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.stat { background: var(--sand); border-radius: var(--radius); padding: 20px; text-align: center; }
+.stat .label { font-size: 0.78rem; color: var(--stone); margin-bottom: 6px; }
+.stat .value { font-size: 1.25rem; font-weight: 700; color: var(--accent); }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.tag { display: inline-block; padding: 5px 14px; border-radius: 20px; font-size: 0.8rem; background: var(--ink); color: var(--paper); }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.grid-card { background: white; border-radius: var(--radius); overflow: hidden; border: 1px solid rgba(0,0,0,0.05); }
+.grid-card .card-image { width: 100%; height: 200px; object-fit: cover; }
+.grid-card .body { padding: 16px 18px; }
+.grid-card h4 { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
+.grid-card .info { font-size: 0.85rem; color: var(--stone); margin: 4px 0; }
+.grid-card .badge { display: inline-block; padding: 3px 10px; border-radius: 10px; font-size: 0.75rem; background: var(--sand); color: var(--secondary); margin-top: 8px; }
+.source-list { list-style: none; }
+.source-item { padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.04); display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.source-item .title { font-weight: 600; font-size: 0.95rem; }
+.source-item .meta { font-size: 0.8rem; color: var(--stone); margin-top: 2px; }
+.source-item a { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+.tips-list { list-style: none; counter-reset: tip; }
+.tips-list li { counter-increment: tip; padding: 14px 0; border-bottom: 1px solid rgba(0,0,0,0.04); display: flex; align-items: flex-start; gap: 14px; }
+.tips-list li::before { content: counter(tip); display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: white; font-size: 0.78rem; font-weight: 700; flex-shrink: 0; }
+footer { text-align: center; padding: 40px var(--space); color: var(--stone); font-size: 0.82rem; border-top: 1px solid rgba(0,0,0,0.06); margin-top: 20px; }
+@media (max-width: 640px) {
+  .hero { padding: 48px 16px; }
+  .hero .meta { flex-direction: column; gap: 8px; }
+  .toc ul { flex-direction: column; }
+  .grid { grid-template-columns: 1fr; }
+  .source-item { flex-direction: column; align-items: flex-start; gap: 6px; }
 }
 </style>
 </head>
 <body>
-
-<!-- ════════════════ HERO ════════════════ -->
 <header class="hero">
-  <div class="hero-content">
+  <div class="wrap">
     <h1>呼伦贝尔</h1>
-    <p class="subtitle">基于小红书 5 篇真实攻略生成</p>
+    <p class="subtitle">基于小红书 12 篇真实攻略生成 · 从哈尔滨出发</p>
     <div class="meta">
-      <div class="meta-item">
-        <span class="meta-value">6</span>
-        <span class="meta-label">天行程</span>
-      </div>
-      <div class="meta-item">
-        <span class="meta-value">3000-5000元</span>
-        <span class="meta-label">预算估计</span>
-      </div>
-      <div class="meta-item">
-        <span class="meta-value">2026年6月11日</span>
-        <span class="meta-label">生成日期</span>
-      </div>
+      <span>6 天行程</span>
+      <span>中档预算</span>
+      <span>2026年6月11日</span>
     </div>
   </div>
 </header>
-
-<!-- ════════════════ TOC ════════════════ -->
-<nav class="toc wrap" aria-label="目录导航">
-  <div class="toc-title">目录导航</div>
+<nav class="toc wrap">
   <ul>
-    <li><a href="#overview">📋 行程概览</a></li>
-    <li><a href="#itinerary">🗓️ 每日行程</a></li>
-    <li><a href="#food">🍜 美食推荐</a></li>
-    <li><a href="#spots">📸 景点打卡</a></li>
-    <li><a href="#transport">🚇 交通指南</a></li>
-    <li><a href="#tips">💡 实用贴士</a></li>
-    <li><a href="#sources">📚 数据来源</a></li>
+    <li><a href="#overview">行程概览</a></li>
+    <li><a href="#spots">景点打卡</a></li>
+    <li><a href="#food">美食推荐</a></li>
+    <li><a href="#tips">实用贴士</a></li>
+    <li><a href="#sources">数据来源</a></li>
   </ul>
 </nav>
-
 <div class="wrap">
-
-  <!-- ════════════════ OVERVIEW ════════════════ -->
-  <section id="overview" class="reveal">
-    <h2 class="section-head">
-      <span class="icon">◉</span>
-      行程概览
-    </h2>
+  <section id="overview">
+    <h2 class="section-head">📋 行程概览</h2>
     <div class="overview-grid">
-      <div class="stat">
-        <div class="label">最佳季节</div>
-        <div class="value">6-9月</div>
-      </div>
-      <div class="stat">
-        <div class="label">推荐天数</div>
-        <div class="value">6 天</div>
-      </div>
-      <div class="stat">
-        <div class="label">预算估计</div>
-        <div class="value">3000-5000元</div>
-      </div>
+      <div class="stat"><div class="label">最佳季节</div><div class="value">6-9月</div></div>
+      <div class="stat"><div class="label">推荐天数</div><div class="value">6 天</div></div>
+      <div class="stat"><div class="label">预算估计</div><div class="value">3000-5000元</div></div>
+      <div class="stat"><div class="label">笔记数量</div><div class="value">12 篇</div></div>
     </div>
-    {% if overview.highlights %}
     <div class="tags">
       <span class="tag">呼伦贝尔大草原</span>
-<span class="tag">莫日格勒河</span>
-<span class="tag">额尔古纳湿地</span>
-<span class="tag">呼伦湖</span>
-<span class="tag">满洲里国门</span>
-<span class="tag">星空篝火</span>
-
+      <span class="tag">莫日格勒河</span>
+      <span class="tag">额尔古纳湿地</span>
+      <span class="tag">呼伦湖</span>
+      <span class="tag">满洲里国门</span>
+      <span class="tag">星空篝火</span>
     </div>
-    {% endif %}
   </section>
-
-  <!-- ════════════════ ITINERARY ════════════════ -->
-  <section id="itinerary" class="reveal">
-    <h2 class="section-head">
-      <span class="icon">◎</span>
-      每日行程
-      <span class="count">{{ itinerary | length }} 天</span>
-    </h2>
-    {% for day in itinerary %}
-    <div class="day reveal reveal-delay-{{ loop.index0 % 3 + 1 }}">
-      <div class="day-head">
-        <div class="day-num">D{{ day.day }}</div>
-        <div class="day-title">{{ day.theme }}</div>
-      </div>
-      {% for act in day.activities %}
-      <div class="activity">
-        <span class="time-badge">{{ act.time }}</span>
-        <h4>{{ act.spot }}</h4>
-        <p>{{ act.description }}</p>
-        <div class="meta-row">
-          {% if act.duration %}<span>⏱ {{ act.duration }}</span>{% endif %}
-          {% if act.tips %}<span>💡 {{ act.tips }}</span>{% endif %}
-        </div>
-        {% if act.image %}<img src="{{ act.image }}" alt="{{ act.spot }}" class="activity-image" loading="lazy">{% endif %}
-      </div>
-      {% endfor %}
-    </div>
-    {% endfor %}
-  </section>
-
-  <!-- ════════════════ FOOD ════════════════ -->
-  <section id="food" class="reveal">
-    <h2 class="section-head">
-      <span class="icon">◉</span>
-      美食推荐
-      <span class="count">{{ food_recommendations | length }} 家</span>
-    </h2>
+  <section id="spots">
+    <h2 class="section-head">📸 景点打卡</h2>
     <div class="grid">
-      {% for f in food_recommendations %}
-      <div class="grid-card reveal reveal-delay-{{ loop.index0 % 3 + 1 }}">
-        {% if f.image %}
-        <div class="grid-card-image-wrapper">
-          <img src="{{ f.image }}" alt="{{ f.name }}" class="grid-card-image" loading="lazy">
-        </div>
-        {% endif %}
+      
+    <div class="grid-card">
+        <img src="images/spot_0b1c76dcd5fce5d5.jpg" alt="海拉尔" class="card-image" loading="lazy">
         <div class="body">
-          <h4>{{ f.name }}</h4>
-          <div class="info">🍽 {{ f.type }}</div>
-          <div class="info">📍 {{ f.location }}</div>
-          <div class="info">💰 {{ f.price_range }}</div>
-          <div class="info">⭐ 必点：{{ f.must_try }}</div>
-          {% if f.source %}<div class="source">来源：{{ f.source }}</div>{% endif %}
+            <h4>海拉尔</h4>
+            <span class="badge">景点</span>
+            <div class="info" style="margin-top:10px">海拉尔是呼伦贝尔的著名景点</div>
+            <div class="info">⏱ 建议游玩：2小时</div>
         </div>
-      </div>
-      {% endfor %}
+    </div>
+    
+    <div class="grid-card">
+        
+        <div class="body">
+            <h4>莫日格勒河</h4>
+            <span class="badge">景点</span>
+            <div class="info" style="margin-top:10px">莫日格勒河是呼伦贝尔的著名景点</div>
+            <div class="info">⏱ 建议游玩：2小时</div>
+        </div>
+    </div>
+    
+    <div class="grid-card">
+        
+        <div class="body">
+            <h4>呼伦湖</h4>
+            <span class="badge">景点</span>
+            <div class="info" style="margin-top:10px">呼伦湖是呼伦贝尔的著名景点</div>
+            <div class="info">⏱ 建议游玩：2小时</div>
+        </div>
+    </div>
+    
+    <div class="grid-card">
+        <img src="images/spot_883f38ae61c3a813.jpg" alt="满洲里" class="card-image" loading="lazy">
+        <div class="body">
+            <h4>满洲里</h4>
+            <span class="badge">景点</span>
+            <div class="info" style="margin-top:10px">满洲里是呼伦贝尔的著名景点</div>
+            <div class="info">⏱ 建议游玩：2小时</div>
+        </div>
+    </div>
+    
+    <div class="grid-card">
+        <img src="images/spot_16b5949f845f9ff6.jpg" alt="草原" class="card-image" loading="lazy">
+        <div class="body">
+            <h4>草原</h4>
+            <span class="badge">景点</span>
+            <div class="info" style="margin-top:10px">草原是呼伦贝尔的著名景点</div>
+            <div class="info">⏱ 建议游玩：2小时</div>
+        </div>
+    </div>
+    
+    <div class="grid-card">
+        <img src="images/spot_1da966f887f9ee71.jpg" alt="额尔古纳" class="card-image" loading="lazy">
+        <div class="body">
+            <h4>额尔古纳</h4>
+            <span class="badge">景点</span>
+            <div class="info" style="margin-top:10px">额尔古纳是呼伦贝尔的著名景点</div>
+            <div class="info">⏱ 建议游玩：2小时</div>
+        </div>
+    </div>
+    
+    <div class="grid-card">
+        <img src="images/spot_f0749b9e35d23b6f.jpg" alt="黑山头" class="card-image" loading="lazy">
+        <div class="body">
+            <h4>黑山头</h4>
+            <span class="badge">景点</span>
+            <div class="info" style="margin-top:10px">黑山头是呼伦贝尔的著名景点</div>
+            <div class="info">⏱ 建议游玩：2小时</div>
+        </div>
+    </div>
+    
+    <div class="grid-card">
+        <img src="images/spot_d400c840ef2b2926.jpg" alt="恩和" class="card-image" loading="lazy">
+        <div class="body">
+            <h4>恩和</h4>
+            <span class="badge">景点</span>
+            <div class="info" style="margin-top:10px">恩和是呼伦贝尔的著名景点</div>
+            <div class="info">⏱ 建议游玩：2小时</div>
+        </div>
+    </div>
+    
+    <div class="grid-card">
+        <img src="images/spot_308dd1ef9cb272e6.jpg" alt="湿地" class="card-image" loading="lazy">
+        <div class="body">
+            <h4>湿地</h4>
+            <span class="badge">景点</span>
+            <div class="info" style="margin-top:10px">湿地是呼伦贝尔的著名景点</div>
+            <div class="info">⏱ 建议游玩：2小时</div>
+        </div>
+    </div>
+    
+    <div class="grid-card">
+        
+        <div class="body">
+            <h4>牧场</h4>
+            <span class="badge">景点</span>
+            <div class="info" style="margin-top:10px">牧场是呼伦贝尔的著名景点</div>
+            <div class="info">⏱ 建议游玩：2小时</div>
+        </div>
+    </div>
+    
     </div>
   </section>
-
-  <!-- ════════════════ SPOTS ════════════════ -->
-  <section id="spots" class="reveal">
-    <h2 class="section-head">
-      <span class="icon">◎</span>
-      景点打卡
-      <span class="count">{{ spots | length }} 个</span>
-    </h2>
+  <section id="food">
+    <h2 class="section-head">🍜 美食推荐</h2>
     <div class="grid">
-      {% for s in spots %}
-      <div class="grid-card reveal reveal-delay-{{ loop.index0 % 3 + 1 }}">
-        {% if s.image %}
-        <div class="grid-card-image-wrapper">
-          <img src="{{ s.image }}" alt="{{ s.name }}" class="grid-card-image" loading="lazy">
-        </div>
-        {% endif %}
+      
+    <div class="grid-card">
         <div class="body">
-          <h4>{{ s.name }}</h4>
-          <span class="badge">{{ s.category }}</span>
-          <div class="info" style="margin-top:12px">{{ s.description }}</div>
-          <div class="info">⏱ 建议游玩：{{ s.duration }}</div>
-          {% if s.tips %}<div class="info">💡 {{ s.tips }}</div>{% endif %}
+            <h4>火锅</h4>
+            <div class="info">🍖 当地特色</div>
+            <div class="info">📍 呼伦贝尔各地</div>
+            <div class="info">💰 人均50-100元</div>
+            <div class="info">⭐ 必点：火锅</div>
         </div>
-      </div>
-      {% endfor %}
+    </div>
+    
+    <div class="grid-card">
+        <div class="body">
+            <h4>列巴</h4>
+            <div class="info">🍖 当地特色</div>
+            <div class="info">📍 呼伦贝尔各地</div>
+            <div class="info">💰 人均50-100元</div>
+            <div class="info">⭐ 必点：列巴</div>
+        </div>
+    </div>
+    
+    <div class="grid-card">
+        <div class="body">
+            <h4>羊肉</h4>
+            <div class="info">🍖 当地特色</div>
+            <div class="info">📍 呼伦贝尔各地</div>
+            <div class="info">💰 人均50-100元</div>
+            <div class="info">⭐ 必点：羊肉</div>
+        </div>
+    </div>
+    
+    <div class="grid-card">
+        <div class="body">
+            <h4>饺子</h4>
+            <div class="info">🍖 当地特色</div>
+            <div class="info">📍 呼伦贝尔各地</div>
+            <div class="info">💰 人均50-100元</div>
+            <div class="info">⭐ 必点：饺子</div>
+        </div>
+    </div>
+    
+    <div class="grid-card">
+        <div class="body">
+            <h4>西餐</h4>
+            <div class="info">🍖 当地特色</div>
+            <div class="info">📍 呼伦贝尔各地</div>
+            <div class="info">💰 人均50-100元</div>
+            <div class="info">⭐ 必点：西餐</div>
+        </div>
+    </div>
+    
     </div>
   </section>
-
-  <!-- ════════════════ TRANSPORT ════════════════ -->
-  <section id="transport" class="reveal">
-    <h2 class="section-head">
-      <span class="icon">◉</span>
-      交通指南
-    </h2>
-    <div class="transport-card">
-      <div class="transport-item">
-        <div class="transport-label">✈️ 机场 / 车站到市区</div>
-        <div>{{ transportation.from_airport }}</div>
-      </div>
-      <div class="transport-item">
-        <div class="transport-label">🚌 市内交通</div>
-        <div>{{ transportation.local | join('、') }}</div>
-      </div>
-      {% if transportation.tips %}
-      <div class="transport-item">
-        <div class="transport-label">💡 交通小贴士</div>
-        <div>{{ transportation.tips }}</div>
-      </div>
-      {% endif %}
-    </div>
-  </section>
-
-  <!-- ════════════════ TIPS ════════════════ -->
-  <section id="tips" class="reveal">
-    <h2 class="section-head">
-      <span class="icon">◎</span>
-      实用贴士
-      <span class="count">{{ tips | length }} 条</span>
-    </h2>
-    <div class="tips-card">
+  <section id="tips">
+    <h2 class="section-head">💡 实用贴士</h2>
+    <div class="card">
       <ol class="tips-list">
-        {% for tip in tips %}
-        <li>{{ tip }}</li>
-        {% endfor %}
+        <li>⚠️ 6月特别注意事项</li>
+<li>❸草原很多操场是私人领地，如自驾谨慎闯入，不要破坏草地！</li>
+<li>强烈建议包车，越野车穿越草原很🉑，本地司机知道小众机位，还会帮忙避开坑</li>
+<li>这里有没有好吃的 要本地人都吃的那种不要广！！</li>
+<li>全程都给我旅行和生活建议推荐的餐厅也超好吃不踩雷</li>
+<li>❺草原深处信号不佳，有些地方无网络！自由行能力一般的建议包车找领队！他们可以带你去一些私藏宝藏地！</li>
+<li>海拉尔有什么不吃会后悔的好吃饭店吗？两个半天时间推荐去哪里逛逛呢？</li>
+<li>4️⃣满洲里 我觉得像童话小镇 俄罗斯边境！夜晚路上都很漂亮奥莱商场很便宜买了厚点的衣服 酒店找的维也纳强烈推荐 性价比很高还很干净！</li>
+
       </ol>
     </div>
   </section>
-
-  <!-- ════════════════ SOURCES ════════════════ -->
-  <section id="sources" class="reveal">
-    <h2 class="section-head">
-      <span class="icon">◉</span>
-      数据来源
-      <span class="count">5 篇</span>
-    </h2>
-    <p style="color:var(--stone);margin-bottom:20px;font-size:0.92rem">本攻略基于以下小红书笔记生成</p>
+  <section id="sources">
+    <h2 class="section-head">📚 数据来源</h2>
+    <p style="color:var(--stone);margin-bottom:16px;font-size:0.9rem">本攻略基于以下小红书笔记生成</p>
     <ul class="source-list">
-      {% for src in sources %}
-      <li class="source-item reveal reveal-delay-{{ loop.index0 % 3 + 1 }}">
-        <div class="source-info">
-          <div class="source-title">{{ src.title }}</div>
-          <div class="source-meta">
-            <span>作者：{{ src.author }}</span>
-            <span>👍 {{ src.likes }}</span>
-            <span>⭐ {{ src.collected }}</span>
-          </div>
+      
+    <li class="source-item">
+        <div>
+            <div class="title">初夏的大兴安岭，庆幸这片天地只属于中国！！！</div>
+            <div class="meta">作者：皓蜀黍 · 👍 1984</div>
         </div>
-        {% if src.url %}
-        <a href="{{ src.url }}" target="_blank" rel="noopener" class="source-link">
-          <svg class="share-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/>
-          </svg>
-          查看原文
-        </a>
-        {% endif %}
-      </li>
-      {% endfor %}
+        <a href="https://www.xiaohongshu.com/explore/6a2735b8000000001603e0b3" target="_blank" rel="noopener">查看原文</a>
+    </li>
+    
+    <li class="source-item">
+        <div>
+            <div class="title">呼伦贝尔公共交通攻略，6日南北线</div>
+            <div class="meta">作者：阿晴呀阿 · 👍 1203</div>
+        </div>
+        <a href="https://www.xiaohongshu.com/explore/68c3b6c7000000001d01eba3" target="_blank" rel="noopener">查看原文</a>
+    </li>
+    
+    <li class="source-item">
+        <div>
+            <div class="title">求本地人推荐饭馆</div>
+            <div class="meta">作者：W. · 👍 344</div>
+        </div>
+        <a href="https://www.xiaohongshu.com/explore/6a032c87000000003503b01c" target="_blank" rel="noopener">查看原文</a>
+    </li>
+    
+    <li class="source-item">
+        <div>
+            <div class="title">到海拉尔了！！超听劝。。🥺🥺</div>
+            <div class="meta">作者：小猪不乱撞 · 👍 234</div>
+        </div>
+        <a href="https://www.xiaohongshu.com/explore/68d11b59000000001301f761" target="_blank" rel="noopener">查看原文</a>
+    </li>
+    
+    <li class="source-item">
+        <div>
+            <div class="title">Live图！呼伦贝尔的夏天宛如人间天堂（附攻略</div>
+            <div class="meta">作者：元气蕊蕊 · 👍 215</div>
+        </div>
+        <a href="https://www.xiaohongshu.com/explore/6a23b96a000000002101b7d0" target="_blank" rel="noopener">查看原文</a>
+    </li>
+    
     </ul>
   </section>
-
 </div>
-
-<!-- ════════════════ FOOTER ════════════════ -->
 <footer>
-  <p>由 <strong>小红书旅行攻略生成器</strong> 自动生成</p>
-  <div class="footer-meta">
-    <span>2026年6月11日</span>
-    <span>数据来源：小红书</span>
-    <span>5 篇笔记</span>
-  </div>
+  <p>由 <strong>小红书旅行攻略生成器</strong> 自动生成 · 2026年6月11日</p>
+  <p style="margin-top:8px">出发地：哈尔滨 · 旅行风格：休闲 · 预算：中档 · 兴趣：美食、文化、自然</p>
 </footer>
-
-<!-- ════════════════ REVEAL SCRIPT ════════════════ -->
-<script>
-(function() {
-  'use strict';
-
-  var els = document.querySelectorAll('.reveal');
-  if (!els.length) return;
-
-  // Respect reduced motion
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    els.forEach(function(el) { el.classList.add('visible'); });
-    return;
-  }
-
-  var observer = new IntersectionObserver(function(entries) {
-    entries.forEach(function(entry) {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-        observer.unobserve(entry.target);
-      }
-    });
-  }, {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-  });
-
-  els.forEach(function(el) {
-    observer.observe(el);
-  });
-
-  // Smooth scroll for TOC links
-  document.querySelectorAll('.toc a[href^="#"]').forEach(function(link) {
-    link.addEventListener('click', function(e) {
-      e.preventDefault();
-      var targetId = this.getAttribute('href').substring(1);
-      var target = document.getElementById(targetId);
-      if (target) {
-        target.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        });
-      }
-    });
-  });
-})();
-</script>
-
 </body>
 </html>
