@@ -112,6 +112,13 @@ def format_scraped_data_for_analysis(scraped_data: dict, preferences: dict, days
         images = note.get("imageList", [])
         feed_id = note.get("noteId", "")
 
+        # 获取笔记链接
+        note_url = ""
+        for feed in feeds:
+            if feed.get("id") == feed_id:
+                note_url = feed.get("url", "")
+                break
+
         content = body if body else desc
         content = truncate_text(content, 3000)  # 增加内容长度限制
 
@@ -120,6 +127,8 @@ def format_scraped_data_for_analysis(scraped_data: dict, preferences: dict, days
         prompt += f"- 点赞: {likes} | 收藏: {collected}\n"
         prompt += f"- 标签: {', '.join(tags) if tags else '无'}\n"
         prompt += f"- 图片数: {len(images)}\n"
+        if note_url:
+            prompt += f"- 链接: {note_url}\n"
 
         # 添加图片路径信息
         if feed_id in feed_images:
@@ -192,7 +201,8 @@ def format_scraped_data_for_analysis(scraped_data: dict, preferences: dict, days
             "title": "笔记标题",
             "author": "作者",
             "likes": "点赞数",
-            "url": "小红书链接"
+            "collected": "收藏数",
+            "url": "小红书链接（必须包含）"
         }
     ]
 }

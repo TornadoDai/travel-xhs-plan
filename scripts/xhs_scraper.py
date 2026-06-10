@@ -344,12 +344,23 @@ def scrape_destination(destination: str, preferences: dict, max_feeds: int = 15)
 
 def _format_feed_summary(feed: dict) -> dict:
     """格式化搜索结果摘要"""
+    feed_id = feed.get("id", "")
+    xsec_token = feed.get("xsecToken", "")
+
+    # 构建小红书分享链接
+    share_url = ""
+    if feed_id:
+        share_url = f"https://www.xiaohongshu.com/explore/{feed_id}"
+        if xsec_token:
+            share_url += f"?xsec_token={xsec_token}&xsec_source=pc_feed"
+
     return {
-        "id": feed.get("id", ""),
+        "id": feed_id,
         "title": feed.get("displayTitle", ""),
         "author": feed.get("user", {}).get("nickname", ""),
         "likes": feed.get("interactInfo", {}).get("likedCount", "0"),
         "collected": feed.get("interactInfo", {}).get("collectedCount", "0"),
         "cover": feed.get("cover", ""),
-        "xsec_token": feed.get("xsecToken", ""),
+        "xsec_token": xsec_token,
+        "url": share_url,
     }
