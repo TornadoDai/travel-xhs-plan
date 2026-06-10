@@ -126,7 +126,14 @@ def _run_xhs_command(command: str, args: dict) -> dict:
     cli_path = _get_xhs_cli_path()
     xhs_path = os.path.dirname(os.path.dirname(cli_path))
 
-    cmd = [sys.executable, cli_path, command]
+    # 优先使用 uv run，回退到直接 python
+    import shutil
+    uv_path = shutil.which("uv")
+    if uv_path:
+        cmd = [uv_path, "run", "python", cli_path, command]
+    else:
+        cmd = [sys.executable, cli_path, command]
+
     for key, value in args.items():
         if value is not None:
             cmd.extend([f"--{key}", str(value)])
@@ -140,7 +147,7 @@ def _run_xhs_command(command: str, args: dict) -> dict:
             text=True,
             encoding="utf-8",
             cwd=xhs_path,
-            timeout=120
+            timeout=180  # 增加超时时间
         )
 
         if result.returncode != 0:
@@ -213,30 +220,40 @@ def download_feed_images(feed_details: list[dict], save_dir: Optional[str] = Non
     if save_dir is None:
         save_dir = str(get_images_dir())
 
+    # 确保目录存在
+    os.makedirs(save_dir, exist_ok=True)
+
     config = load_config()
-    max_images = config.get("max_images_per_feed", 5)
+    max_images = config.get("max_images_per_feed", 3)  # 每篇笔记最多3张图片
 
     # 导入 image_downloader
     xhs_path = config.get("xhs_skills_path", "")
-    if xhs_path:
-        sys.path.insert(0, xhs_path)
+    if not xhs_path:
+        logger.warning("未配置 xhs_skills_path，跳过图片下载")
+        return {}
+
+    # 将 scripts 目录加入路径
+    scripts_path = os.path.join(xhs_path, "scripts")
+    if scripts_path not in sys.path:
+        sys.path.insert(0, scripts_path)
 
     try:
         from image_downloader import ImageDownloader
-    except ImportError:
-        logger.warning("无法导入 image_downloader，跳过图片下载")
+    except ImportError as e:
+        logger.warning(f"无法导入 image_downloader: {e}")
         return {}
 
     downloader = ImageDownloader(save_dir)
     result = {}
 
     for feed in feed_details:
-        feed_id = feed.get("noteId", "")
+        note = feed.get("note", {})
+        feed_id = note.get("noteId", "")
         if not feed_id:
             continue
 
         image_paths = []
-        image_list = feed.get("imageList", [])
+        image_list = note.get("imageList", [])
 
         for img in image_list[:max_images]:
             url = img.get("urlDefault", "")
@@ -254,14 +271,14 @@ def download_feed_images(feed_details: list[dict], save_dir: Optional[str] = Non
     return result
 
 
-def scrape_destination(destination: str, preferences: dict, max_feeds: int = 20) -> dict:
+def scrape_destination(destination: str, preferences: dict, max_feeds: int = 15) -> dict:
     """
     抓取目的地相关内容。
 
     Args:
         destination: 目的地
         preferences: 用户偏好
-        max_feeds: 最大抓取数量
+        max_feeds: 最大抓取数量（默认15篇）
 
     Returns:
         dict: 抓取结果，包含 feeds 和 images
@@ -270,24 +287,28 @@ def scrape_destination(destination: str, preferences: dict, max_feeds: int = 20)
     keywords = generate_search_keywords(destination, preferences)
     logger.info(f"生成 {len(keywords)} 个搜索关键词: {keywords}")
 
-    # 2. 搜索小红书内容
+    # 2. 搜索小红书内容（每个关键词搜索更多结果）
     all_feeds = []
     seen_ids = set()
 
-    for keyword in keywords:
+    for keyword in keywords[:8]:  # 限制关键词数量，避免过多请求
         try:
-            feeds = search_xhs_content(keyword, limit=5)
+            feeds = search_xhs_content(keyword, limit=8)  # 每个关键词获取8篇
             for feed in feeds:
                 feed_id = feed.get("id", "")
                 if feed_id and feed_id not in seen_ids:
                     seen_ids.add(feed_id)
                     all_feeds.append(feed)
+            logger.info(f"关键词 '{keyword}' 找到 {len(feeds)} 篇")
         except Exception as e:
             logger.warning(f"搜索 '{keyword}' 失败: {e}")
 
     logger.info(f"共找到 {len(all_feeds)} 篇不重复内容")
 
-    # 3. 获取笔记详情
+    # 3. 按点赞数排序，优先获取高质量内容
+    all_feeds.sort(key=lambda x: int(x.get("interactInfo", {}).get("likedCount", "0") or "0"), reverse=True)
+
+    # 4. 获取笔记详情（目标15篇）
     feed_details = []
     for feed in all_feeds[:max_feeds]:
         feed_id = feed.get("id", "")
@@ -297,20 +318,21 @@ def scrape_destination(destination: str, preferences: dict, max_feeds: int = 20)
 
         try:
             detail = get_feed_detail(feed_id, xsec_token)
-            if detail:
+            if detail and detail.get("note", {}).get("title"):
                 feed_details.append(detail)
-                logger.debug(f"获取详情: {feed.get('displayTitle', feed_id)}")
+                logger.info(f"获取详情 ({len(feed_details)}/{max_feeds}): {detail.get('note', {}).get('title', feed_id)[:30]}")
         except Exception as e:
             logger.warning(f"获取详情失败 {feed_id}: {e}")
 
     logger.info(f"成功获取 {len(feed_details)} 篇笔记详情")
 
-    # 4. 下载图片
+    # 5. 下载图片
     images_dir = str(get_images_dir() / destination.replace(" ", "_"))
     feed_images = download_feed_images(feed_details, images_dir)
-    logger.info(f"下载了 {sum(len(v) for v in feed_images.values())} 张图片")
+    total_images = sum(len(v) for v in feed_images.values())
+    logger.info(f"下载了 {total_images} 张图片")
 
-    # 5. 整理结果
+    # 6. 整理结果
     return {
         "destination": destination,
         "keywords": keywords,
@@ -327,6 +349,7 @@ def _format_feed_summary(feed: dict) -> dict:
         "title": feed.get("displayTitle", ""),
         "author": feed.get("user", {}).get("nickname", ""),
         "likes": feed.get("interactInfo", {}).get("likedCount", "0"),
+        "collected": feed.get("interactInfo", {}).get("collectedCount", "0"),
         "cover": feed.get("cover", ""),
         "xsec_token": feed.get("xsecToken", ""),
     }

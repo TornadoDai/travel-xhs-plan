@@ -53,6 +53,14 @@ def format_scraped_data_for_analysis(scraped_data: dict, preferences: dict, days
     # 构建提示词
     prompt = f"""请分析以下小红书旅行内容，为用户生成一份个性化的旅行攻略。
 
+## 重要规则
+1. **只使用以下小红书笔记中的真实内容**，不要捏造任何信息
+2. 如果某些信息在笔记中没有提到，请标注"笔记中未提及"
+3. 行程安排必须基于笔记中提到的实际地点和活动
+4. 美食推荐必须来自笔记中提到的真实餐厅或菜品
+5. 价格信息必须来自笔记中的真实数据
+6. 如有冲突信息，以点赞数更高的笔记为准
+
 ## 目的地
 {destination}
 
@@ -81,30 +89,31 @@ def format_scraped_data_for_analysis(scraped_data: dict, preferences: dict, days
 - 旅行同伴：{companion_map.get(preferences.get('travel_companions', ''), '独自')}
 - 旅行节奏：{pace_map.get(preferences.get('pace_preference', ''), '适中')}
 
-## 小红书搜索结果摘要（共 {len(feeds)} 篇）
+## 小红书搜索结果摘要（共 {len(feeds)} 篇，按点赞数排序）
 """
 
-    for i, feed in enumerate(feeds, 1):
+    for i, feed in enumerate(feeds[:20], 1):
         prompt += f"\n{i}. {feed.get('title', '无标题')}"
-        prompt += f"\n   作者: {feed.get('author', '未知')} | 点赞: {feed.get('likes', '0')}"
+        prompt += f"\n   作者: {feed.get('author', '未知')} | 点赞: {feed.get('likes', '0')} | 收藏: {feed.get('collected', '0')}"
 
-    prompt += "\n\n## 小红书笔记详细内容\n"
+    prompt += "\n\n## 小红书笔记详细内容（共 " + str(len(feed_details)) + " 篇）\n"
 
     for i, detail in enumerate(feed_details, 1):
-        title = detail.get("title", "无标题")
-        desc = detail.get("desc", "")
-        body = detail.get("body", "")
-        tags = detail.get("tags", [])
-        user = detail.get("user", {})
+        note = detail.get("note", detail)  # 兼容两种格式
+        title = note.get("title", "无标题")
+        desc = note.get("desc", "")
+        body = note.get("body", "")
+        tags = note.get("tags", [])
+        user = note.get("user", {})
         nickname = user.get("nickname", "未知")
-        interact = detail.get("interactInfo", {})
+        interact = note.get("interactInfo", {})
         likes = interact.get("likedCount", "0")
         collected = interact.get("collectedCount", "0")
-        images = detail.get("imageList", [])
-        feed_id = detail.get("noteId", "")
+        images = note.get("imageList", [])
+        feed_id = note.get("noteId", "")
 
         content = body if body else desc
-        content = truncate_text(content, 2000)
+        content = truncate_text(content, 3000)  # 增加内容长度限制
 
         prompt += f"\n### 笔记 {i}: {title}\n"
         prompt += f"- 作者: {nickname}\n"
@@ -121,14 +130,14 @@ def format_scraped_data_for_analysis(scraped_data: dict, preferences: dict, days
     prompt += """
 ## 输出要求
 
-请根据以上内容，生成一份结构化的旅行攻略。输出格式为 JSON：
+请根据以上小红书笔记的真实内容，生成一份结构化的旅行攻略。输出格式为 JSON：
 
 ```json
 {
     "overview": {
-        "best_season": "最佳旅行季节",
+        "best_season": "最佳旅行季节（必须来自笔记内容）",
         "recommended_days": 5,
-        "budget_estimate": "预算估计",
+        "budget_estimate": "预算估计（必须来自笔记中的真实价格）",
         "highlights": ["亮点1", "亮点2", "亮点3"]
     },
     "itinerary": [
@@ -137,11 +146,11 @@ def format_scraped_data_for_analysis(scraped_data: dict, preferences: dict, days
             "theme": "当日主题",
             "activities": [
                 {
-                    "time": "上午",
-                    "spot": "地点名称",
-                    "description": "详细描述",
+                    "time": "上午/下午/晚上",
+                    "spot": "地点名称（必须是笔记中提到的真实地点）",
+                    "description": "详细描述（基于笔记内容）",
                     "duration": "建议时长",
-                    "tips": "小贴士",
+                    "tips": "小贴士（来自笔记）",
                     "image": "对应的本地图片路径（如有）"
                 }
             ]
@@ -149,32 +158,32 @@ def format_scraped_data_for_analysis(scraped_data: dict, preferences: dict, days
     ],
     "food_recommendations": [
         {
-            "name": "餐厅名称",
+            "name": "餐厅/美食名称（必须来自笔记）",
             "type": "菜系类型",
-            "location": "位置",
-            "price_range": "价格范围",
-            "must_try": "必点菜品",
-            "source": "来源笔记",
+            "location": "位置（如有）",
+            "price_range": "价格范围（来自笔记）",
+            "must_try": "必点菜品（来自笔记）",
+            "source": "来源笔记作者",
             "image": "对应的本地图片路径（如有）"
         }
     ],
     "spots": [
         {
-            "name": "景点名称",
+            "name": "景点名称（必须来自笔记）",
             "category": "类别",
-            "description": "描述",
+            "description": "描述（基于笔记内容）",
             "duration": "建议游玩时长",
-            "tips": "小贴士",
+            "tips": "小贴士（来自笔记）",
             "image": "对应的本地图片路径（如有）"
         }
     ],
     "transportation": {
-        "from_airport": "机场到市区交通",
+        "from_airport": "出发地到目的地的交通（来自笔记）",
         "local": ["市内交通方式1", "市内交通方式2"],
-        "tips": "交通小贴士"
+        "tips": "交通小贴士（来自笔记）"
     },
     "tips": [
-        "实用贴士1",
+        "实用贴士1（必须来自笔记内容）",
         "实用贴士2"
     ],
     "sources": [
@@ -190,12 +199,13 @@ def format_scraped_data_for_analysis(scraped_data: dict, preferences: dict, days
 ```
 
 注意事项：
-1. 请根据用户偏好（风格、预算、兴趣）进行个性化推荐
+1. **严格基于笔记内容**：不要添加笔记中没有的信息
 2. 行程安排要合理，考虑地理位置和交通
 3. 美食推荐要包含价格范围和必点菜品
 4. 景点推荐要包含游玩时长和实用小贴士
 5. 如果有对应的本地图片，请在 image 字段中填入路径
 6. 请确保输出为有效的 JSON 格式
+7. 如有冲突信息，以点赞数更高的笔记为准
 """
 
     return prompt
