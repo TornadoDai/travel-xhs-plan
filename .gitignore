@@ -33,15 +33,22 @@ ENV/
 *.swo
 *~
 
-# Output
+# Output (may contain generated content)
 output/guides/*.html
 output/images/*
 !output/images/.gitkeep
 output/*.log
+output/*.json
 
 # User preferences (local data)
 config/preferences/*.json
 config/active_preference
+
+# Temporary files
+*.tmp
+*.cache
+run_xhs_search.py
+push_to_github.py
 
 # Temp
 *.tmp
