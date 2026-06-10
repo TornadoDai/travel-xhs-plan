@@ -1,6 +1,7 @@
 """
 偏好管理模块
 支持多个偏好配置文件的创建、切换、编辑和删除。
+偏好数据保存在项目本地目录，便于版本控制和迁移。
 """
 
 import json
@@ -10,7 +11,7 @@ from typing import Optional
 
 from loguru import logger
 
-from .utils import load_json, save_json, TravelXhsError
+from .utils import load_json, save_json, TravelXhsError, PROJECT_ROOT
 
 
 class PreferenceManager:
@@ -78,8 +79,9 @@ class PreferenceManager:
     }
 
     def __init__(self):
-        self.preferences_dir = Path.home() / ".claude" / "travel_xhs" / "preferences"
-        self.active_preference_file = Path.home() / ".claude" / "travel_xhs" / "active_preference"
+        # 保存在项目本地目录，便于版本控制和迁移
+        self.preferences_dir = PROJECT_ROOT / "config" / "preferences"
+        self.active_preference_file = PROJECT_ROOT / "config" / "active_preference"
         self._ensure_dirs()
 
     def _ensure_dirs(self):

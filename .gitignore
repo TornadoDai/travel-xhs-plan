@@ -39,6 +39,10 @@ output/images/*
 !output/images/.gitkeep
 output/*.log
 
+# User preferences (local data)
+config/preferences/*.json
+config/active_preference
+
 # Temp
 *.tmp
 *.bak
