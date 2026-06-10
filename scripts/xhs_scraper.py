@@ -188,21 +188,29 @@ def search_xhs_content(keyword: str, limit: int = 10) -> list[dict]:
     return feeds[:limit]
 
 
-def get_feed_detail(feed_id: str, xsec_token: str) -> dict:
+def get_feed_detail(feed_id: str, xsec_token: str, load_comments: bool = True) -> dict:
     """
     获取笔记详情。
 
     Args:
         feed_id: 笔记 ID
         xsec_token: 安全令牌
+        load_comments: 是否加载评论（默认True）
 
     Returns:
-        dict: 笔记详情
+        dict: 笔记详情（包含评论）
     """
-    result = _run_xhs_command("get-feed-detail", {
+    args = {
         "feed-id": feed_id,
         "xsec-token": xsec_token,
-    })
+    }
+
+    # 加载评论
+    if load_comments:
+        args["load-all-comments"] = True
+        args["max-comment-items"] = 30  # 最多30条评论
+
+    result = _run_xhs_command("get-feed-detail", args)
     return result
 
 

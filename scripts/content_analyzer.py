@@ -60,6 +60,10 @@ def format_scraped_data_for_analysis(scraped_data: dict, preferences: dict, days
 4. 美食推荐必须来自笔记中提到的真实餐厅或菜品
 5. 价格信息必须来自笔记中的真实数据
 6. 如有冲突信息，以点赞数更高的笔记为准
+7. **重点关注评论中的信息**：
+   - 当地用户（IP地址与目的地相关）的建议更可靠
+   - 高赞评论代表大众认可的建议
+   - 评论中可能包含补充景点、美食、避坑建议等
 
 ## 目的地
 {destination}
@@ -98,6 +102,9 @@ def format_scraped_data_for_analysis(scraped_data: dict, preferences: dict, days
 
     prompt += "\n\n## 小红书笔记详细内容（共 " + str(len(feed_details)) + " 篇）\n"
 
+    # 收集所有评论用于后续分析
+    all_comments = []
+
     for i, detail in enumerate(feed_details, 1):
         note = detail.get("note", detail)  # 兼容两种格式
         title = note.get("title", "无标题")
@@ -135,6 +142,117 @@ def format_scraped_data_for_analysis(scraped_data: dict, preferences: dict, days
             prompt += f"- 本地图片: {', '.join(feed_images[feed_id])}\n"
 
         prompt += f"\n{content}\n"
+
+        # 收集评论
+        comments = detail.get("comments", [])
+        if comments:
+            all_comments.extend([
+                {**c, "note_title": title, "note_author": nickname}
+                for c in comments
+            ])
+
+    # 添加评论分析部分
+    if all_comments:
+        prompt += "\n## 评论分析\n"
+        prompt += "以下是从各篇笔记中提取的评论，重点关注：\n"
+        prompt += "1. **当地用户评论**（IP地址与目的地相关的用户，他们的建议更可靠）\n"
+        prompt += "2. **高赞评论**（获得较多点赞的评论，代表大众认可的建议）\n"
+        prompt += "3. **补充信息**（评论中提到的额外景点、美食、避坑建议等）\n\n"
+
+        # 分类评论
+        local_comments = []  # 当地用户评论
+        high_like_comments = []  # 高赞评论
+        other_comments = []  # 其他评论
+
+        for comment in all_comments:
+            ip_location = comment.get("ipLocation", "")
+            like_count = int(comment.get("likeCount", "0") or "0")
+            content = comment.get("content", "")
+
+            if not content or len(content) < 5:
+                continue
+
+            # 判断是否为当地用户（IP包含目的地关键词）
+            is_local = False
+            if ip_location:
+                # 提取目的地的主要地名（如"呼伦贝尔" -> "呼伦"、"海拉尔"）
+                dest_keywords = [destination[:2], destination[:3], destination[:4]]
+                for keyword in dest_keywords:
+                    if keyword in ip_location:
+                        is_local = True
+                        break
+
+            if is_local:
+                local_comments.append(comment)
+            elif like_count >= 5:  # 高赞阈值
+                high_like_comments.append(comment)
+            elif len(content) > 15:  # 有价值的长评论
+                other_comments.append(comment)
+
+        # 输出当地用户评论
+        if local_comments:
+            prompt += "### 当地用户评论（IP地址与目的地相关）\n"
+            for j, comment in enumerate(local_comments[:10], 1):  # 最多10条
+                user = comment.get("user", {})
+                nickname = user.get("nickname", "未知")
+                ip = comment.get("ipLocation", "")
+                like_count = comment.get("likeCount", "0")
+                content = comment.get("content", "")
+                note_title = comment.get("note_title", "")
+
+                prompt += f"\n{j}. [{ip}] {nickname} (赞: {like_count})\n"
+                prompt += f"   来源笔记: {note_title}\n"
+                prompt += f"   内容: {truncate_text(content, 200)}\n"
+
+                # 添加子评论
+                sub_comments = comment.get("subComments", [])
+                if sub_comments:
+                    for sub in sub_comments[:3]:  # 最多3条子评论
+                        sub_user = sub.get("user", {})
+                        sub_nickname = sub_user.get("nickname", "")
+                        sub_content = sub.get("content", "")
+                        if sub_content and len(sub_content) > 3:
+                            prompt += f"   └─ {sub_nickname}: {truncate_text(sub_content, 100)}\n"
+
+        # 输出高赞评论
+        if high_like_comments:
+            prompt += "\n### 高赞评论（点赞数 ≥ 5）\n"
+            high_like_comments.sort(key=lambda x: int(x.get("likeCount", "0") or "0"), reverse=True)
+            for j, comment in enumerate(high_like_comments[:10], 1):
+                user = comment.get("user", {})
+                nickname = user.get("nickname", "未知")
+                ip = comment.get("ipLocation", "")
+                like_count = comment.get("likeCount", "0")
+                content = comment.get("content", "")
+                note_title = comment.get("note_title", "")
+
+                prompt += f"\n{j}. [{ip}] {nickname} (赞: {like_count})\n"
+                prompt += f"   来源笔记: {note_title}\n"
+                prompt += f"   内容: {truncate_text(content, 200)}\n"
+
+                # 添加子评论
+                sub_comments = comment.get("subComments", [])
+                if sub_comments:
+                    for sub in sub_comments[:3]:
+                        sub_user = sub.get("user", {})
+                        sub_nickname = sub_user.get("nickname", "")
+                        sub_content = sub.get("content", "")
+                        if sub_content and len(sub_content) > 3:
+                            prompt += f"   └─ {sub_nickname}: {truncate_text(sub_content, 100)}\n"
+
+        # 输出其他有价值的评论
+        if other_comments:
+            prompt += "\n### 其他有价值的评论\n"
+            for j, comment in enumerate(other_comments[:8], 1):
+                user = comment.get("user", {})
+                nickname = user.get("nickname", "未知")
+                ip = comment.get("ipLocation", "")
+                content = comment.get("content", "")
+                note_title = comment.get("note_title", "")
+
+                prompt += f"\n{j}. [{ip}] {nickname}\n"
+                prompt += f"   来源笔记: {note_title}\n"
+                prompt += f"   内容: {truncate_text(content, 150)}\n"
 
     prompt += """
 ## 输出要求
