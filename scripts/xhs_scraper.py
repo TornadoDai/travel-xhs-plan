@@ -299,9 +299,9 @@ def scrape_destination(destination: str, preferences: dict, max_feeds: int = 15)
     all_feeds = []
     seen_ids = set()
 
-    for keyword in keywords[:8]:  # 限制关键词数量，避免过多请求
+    for keyword in keywords[:6]:  # 限制关键词数量，避免过多请求
         try:
-            feeds = search_xhs_content(keyword, limit=8)  # 每个关键词获取8篇
+            feeds = search_xhs_content(keyword, limit=10)  # 每个关键词获取10篇
             for feed in feeds:
                 feed_id = feed.get("id", "")
                 if feed_id and feed_id not in seen_ids:
@@ -316,7 +316,7 @@ def scrape_destination(destination: str, preferences: dict, max_feeds: int = 15)
     # 3. 按点赞数排序，优先获取高质量内容
     all_feeds.sort(key=lambda x: int(x.get("interactInfo", {}).get("likedCount", "0") or "0"), reverse=True)
 
-    # 4. 获取笔记详情（目标15篇）
+    # 4. 获取笔记详情（目标10-15篇）
     feed_details = []
     for feed in all_feeds[:max_feeds]:
         feed_id = feed.get("id", "")
@@ -325,7 +325,7 @@ def scrape_destination(destination: str, preferences: dict, max_feeds: int = 15)
             continue
 
         try:
-            detail = get_feed_detail(feed_id, xsec_token)
+            detail = get_feed_detail(feed_id, xsec_token, load_comments=True)
             if detail and detail.get("note", {}).get("title"):
                 # 移除敏感token信息
                 if "note" in detail and "xsec_token" in detail["note"]:
@@ -337,7 +337,7 @@ def scrape_destination(destination: str, preferences: dict, max_feeds: int = 15)
 
     logger.info(f"成功获取 {len(feed_details)} 篇笔记详情")
 
-    # 5. 下载图片
+    # 5. 下载图片（每篇笔记最多3张）
     images_dir = str(get_images_dir() / destination.replace(" ", "_"))
     feed_images = download_feed_images(feed_details, images_dir)
     total_images = sum(len(v) for v in feed_images.values())
