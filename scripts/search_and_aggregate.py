@@ -87,30 +87,43 @@ def get_feed_detail(feed_id: str, xsec_token: str) -> dict:
 
 
 def download_images(image_urls: list, save_dir: str) -> list:
-    """下载图片"""
-    config = load_config()
-    xhs_path = config.get("xhs_skills_path", "")
-    if not xhs_path:
-        return []
-
-    scripts_path = os.path.join(xhs_path, "scripts")
-    if scripts_path not in sys.path:
-        sys.path.insert(0, scripts_path)
-
-    try:
-        from image_downloader import ImageDownloader
-    except ImportError:
-        logger.warning("无法导入 image_downloader")
-        return []
+    """下载图片（使用正确的请求头）"""
+    import hashlib
+    import time
+    import requests
 
     os.makedirs(save_dir, exist_ok=True)
-    downloader = ImageDownloader(save_dir)
+
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'image/webp,image/apng,image/*,*/*;q=0.8',
+        'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+        'Referer': 'https://www.xiaohongshu.com/',
+        'Origin': 'https://www.xiaohongshu.com',
+    }
 
     downloaded = []
     for url in image_urls[:3]:  # 每篇笔记最多3张
         try:
-            local_path = downloader.download_image(url)
-            downloaded.append(local_path)
+            # 生成文件名
+            url_hash = hashlib.sha256(url.encode()).hexdigest()[:16]
+            filename = f"img_{url_hash}.webp"
+            filepath = os.path.join(save_dir, filename)
+
+            # 检查是否已存在
+            if os.path.exists(filepath):
+                downloaded.append(filepath)
+                continue
+
+            # 下载
+            resp = requests.get(url, headers=headers, timeout=30)
+            if resp.status_code == 200:
+                with open(filepath, 'wb') as f:
+                    f.write(resp.content)
+                downloaded.append(filepath)
+                logger.info(f"下载图片成功: {filename}")
+            else:
+                logger.warning(f"下载图片失败: HTTP {resp.status_code}")
         except Exception as e:
             logger.warning(f"下载图片失败: {e}")
 
