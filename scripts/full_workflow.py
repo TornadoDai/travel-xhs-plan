@@ -22,6 +22,10 @@ sys.stdout.reconfigure(encoding='utf-8')
 
 from loguru import logger
 from utils import load_config, get_images_dir, save_json
+from generation_pipeline import (
+    aggregate_data as generate_aggregate_data,
+    generate_html as generate_complete_html,
+)
 
 
 # ============================================================
@@ -670,7 +674,7 @@ def full_workflow(destination: str, preferences: dict, days: int = 6, max_notes:
 
     # 3. 聚合数据
     print("\n[3/5] 聚合数据...")
-    aggregated = aggregate_data(notes, destination)
+    aggregated = generate_aggregate_data(notes, destination)
     print(f"  景点: {len(aggregated['spots'])}")
     print(f"  美食: {len(aggregated['foods'])}")
     print(f"  贴士: {len(aggregated['tips'])}")
@@ -693,12 +697,12 @@ def full_workflow(destination: str, preferences: dict, days: int = 6, max_notes:
 
     # 5. 生成HTML
     print("\n[5/5] 生成HTML攻略...")
-    html = generate_html(notes, aggregated, spot_images, destination, days)
+    html = generate_complete_html(notes, aggregated, spot_images, destination, days)
 
     # 保存HTML
-    output_dir = Path(__file__).parent.parent / "guides"
-    output_dir.mkdir(exist_ok=True)
-    output_path = output_dir / f"{destination.lower()}.html"
+    output_dir = Path(__file__).parent.parent / "output" / "guides"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_path = output_dir / f"{destination}_guide.html"
 
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(html)
